@@ -4,31 +4,39 @@ from curses import wrapper
 
 locale.setlocale(locale.LC_ALL, '')
 
+read = ''
 
-def draw_h_line(scr,y,x,l, ch = u'\u2501'):
+def draw_h_line(scr, y, x, l):
     for i in range(l):
-        scr.addstr(y, x+i, ch)
+        if scr.inch(y, x+i,) == curses.ACS_VLINE:
+            scr.addch(y, x + i, "o")
+        else:
+            scr.addch(y, x + i, curses.ACS_HLINE)
 
 
-def draw_v_line(scr,y,x,l, ch = u'\u2502'):
+def draw_v_line(scr, y, x, l):
     for i in range(l):
-        scr.addstr(y+i, x, ch)
+        scr.addch(y + i, x, curses.ACS_VLINE)
+
+vline = ''
 
 def main(stdscr):
     scr = curses.initscr()
     scr.clear()
-    z = u'\u2501'.encode('utf-8')
-    h_line_char = u'\u2501'
-    v_line_char = u'\u2503'
-    v = u'\u007c'
 
-    # scr.addstr(0, 0, v)
-    # scr.addstr(1, 0, v)
-    # scr.addstr(2, 0, v)
-    # draw_h_line(scr,3,4,50)
-    # draw_v_line(scr,3,4,10)
-    # scr.hline("a",20)
-    scr.wvline(0,10,v)
+    draw_h_line(scr, 3, 0, 5)
+    draw_v_line(scr, 0, 3, 5)
+    print(scr.inch(0, 3))
+
     scr.getch()
+    read = scr.inch(3,0)
+
+    scr.addch(2,2,scr.inch(3,0))
+    vline = curses.ACS_VLINE
+    return vline
 
 wrapper(main)
+
+print main(stdscr)
+print(read)
+print(vline)

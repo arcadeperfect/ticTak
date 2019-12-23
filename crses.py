@@ -29,4 +29,6 @@ def main(stdscr):
 
         n +=1
 
-wrapper(main)
+#wrapper(main)
+
+print(curses.ACS_VLINE)
