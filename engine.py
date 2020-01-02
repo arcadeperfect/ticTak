@@ -1,93 +1,107 @@
 import curses
 from curses import wrapper
 
-#
-# class Board:
-#     def __init__(self):
-
-board_width = 3
-board_height = 3
-
-w = (board_width)*2+1
-h = (board_height)*2+1
-
-v_bar = "│"
-h_bar = "─"
-cross = "┼"
-p1 = "x"
-p2 = "o"
-
-#screen = [["{},{}".format(y,x) for x in range(w)] for y in range(h)]
-#
-# screen = [[None for x in range(w)] for y in range(h)]
-
-screen = [[None for x in range(w)] for y in range(h)]
+# maxYX=stdWindow.getmaxyx()
 
 
+class Board:
 
-def hLine(y,x,l):
-    for i in range(l):
+    def __init__(self, board_width = 3, board_height = 3):
 
-        if screen[y][x+i] == v_bar:
-            screen[y][x + i] = cross
-        else:
-            screen[y][x+i] = h_bar
+        self.board_width = board_width      # board as in actual squares the user can choose from
+        self.board_height = board_height
+        self.w = (self.board_width)*2+1     # width of the display in characters, including grid characters
+        self.h = (self.board_height)*2+1
 
-def vLine(y,x,l):
-    for i in range(l):
-        if screen[y + i][x] == h_bar:
-            screen[y + i][x]  = cross
-        else:
-            screen[y+i][x] = v_bar
+        self.v_bar = u"\u2502"
 
-def p1_piece(y,x):
-    if screen[y][x] == " ":
-        screen[y][x] = p1
-    else:
-        raise Exception('space not empty')
+        self.h_bar = u"\u2504"
+        self.cross = u"\u253C"
+        self.p1 = "x"
+        self.p2 = "o"
 
-def p2_piece(y,x):
-    if screen[y][x] == " ":
-        screen[y][x] = p2
-    else:
-        raise Exception('space not empty')
+        #screen = [["{},{}".format(y,x) for x in range(w)] for y in range(h)]
+        #
+        # screen = [[None for x in range(w)] for y in range(h)]
+
+        self.screen = [[None for x in range(self.w)] for y in range(self.h)]
+        self.drawGrid()
+
+    def drawGrid(self):
+
+        for i in range(self.w):
+            if i % 2 == 0:
+                self.vLine(0, i, self.h)
+
+        for i in range(self.h):
+            if i % 2 == 0:
+                self.hLine(i, 0, self.w)
 
 
-def simpleDraw():
+    def simpleDisplay(self):
 
-    for y in range(h):
-        for x in range(w):
-            z = screen[y][x]
-            if z is None:
-                char = "n"
+        for y in range(self.h):
+            for x in range(self.w):
+                z = self.screen[y][x]
+                if z is None:
+                    char = "n"
+                else:
+                    char = z
+                print(char, end = "")
+
+            print("")
+
+    def cursesDisplay(self, scr):
+
+        for y in range(self.h):
+            for x in range(self.w):
+                cell = self.screen[y][x]
+                if cell is not None:
+                    scr.addch(y,x,cell)
+
+
+    # def getBoard(self):
+    #     return self.screen
+
+    def hLine(self,y,x,l):
+        for i in range(l):
+
+            if self.screen[y][x+i] == self.v_bar:
+                self.screen[y][x + i] = self.cross
             else:
-                char = z
-            print(char, end = "")
-
-        print("")
+                self.screen[y][x+i] = self.h_bar
 
 
-for i in range(w):
-    if i%2==0:
-        vLine(0,i,h)
+    def vLine(self,y,x,l):
+        for i in range(l):
+            if self.screen[y + i][x] == self.h_bar:
+                self.screen[y + i][x]  = self.cross
+            else:
+                self.screen[y+i][x] = self.v_bar
 
-for i in range(h):
-    if i%2==0:
-        hLine(i,0,w)
+
+    def p1_piece(self,y,x):
+        if self.screen[y][x] == " ":
+            self.screen[y][x] = self.p1
+        else:
+            raise Exception('space not empty')
+
+
+    def p2_piece(self,y,x):
+        if self.screen[y][x] == " ":
+            self.screen[y][x] = self.p2
+        else:
+            raise Exception('space not empty')
 
 #
-# vLine(0,6,h)
+# board = Board()
 #
+# board.drawGrid()
 #
-# hLine(4,0,w)
+# board.simpleDisplay()
 #
-#
-# p2_piece(1,4)
 
-print(w,h)
-
-simpleDraw()
-
-
-
-
+if __name__ == "__main__":
+    board = Board()
+    board.drawGrid()
+    board.simpleDisplay()
