@@ -92,7 +92,7 @@ class Screen(object):
                 error += dx
                 y1 += signY
 
-    def center_line(self, x, y, a, l):
+    def center_line(self, x, y, a, l):  # x, y, angle, length
         x, y, a, l = float(x), float(y), float(a), float(l)
         l *= 0.5
         x1 = x + cos(a) * l
@@ -101,20 +101,20 @@ class Screen(object):
         y2 = y - sin(a + pi) * l
         self.line(x1, y1, x2, y2)
 
-    def center_v_line(self, x, y, l):
+    def center_v_line(self, x, y, l):   # vertical line from center
         self.center_line(x, y, pi / 2, l)
 
-    def center_h_line(self, x, y, l):
+    def center_h_line(self, x, y, l):   # horizontal line from center
         self.center_line(x, y, pi * 2, l)
 
-    def angle_line(self, x, y, a, l):
+    def angle_line(self, x, y, a, l):   # define line by one point + angle + length
 
         x, y, a, l = float(x), float(y), float(a), float(l)
         self.line(x, y, x + cos(a) * l, y - sin(a) * l)
         self.point(x, y)
         self.point(x + cos(a) * l, y - sin(a) * l)
 
-    def numScreen(self):
+    def num_screen(self):
         log("numscreen")
         c = 0
         for y in range(self.h):
@@ -124,19 +124,19 @@ class Screen(object):
                 self.screen[x][y] = str(c)
                 c += 1
 
-    def yScreen(self):
+    def y_screen(self):
         for y in range(self.h):
             for x in range(self.w):
                 # ys = -y+self.h-1
                 self.screen[x][y] = str(y)
 
-    def randomScreen(self):
+    def random_screen(self):
 
         for y in range(self.h):
             for x in range(self.w):
                 self.screen[x][y] = str(randint(0, 9))
 
-    def cursesDisplay(self):
+    def curses_display(self):   # display the array through curses
         self.scr.clear()
 
         for y in range(self.h):
@@ -145,36 +145,36 @@ class Screen(object):
                 y = -y + self.h - 1
                 self.scr.addch(y, x, cell)
 
-    def simpleDisplay(self):
+    def simple_display(self):   # write the display to text file
 
         for y in reversed(range(self.h)):
             for x in range(self.w):
                 logNoString(self.screen[x][y])
             logNoString("\n")
 
-    def drawBoard(self, board):
-
-        cw = self.w / 2
-        ch = self.h / 2
-
-        n = board.n
-        x = board.x if board.x else cw
-        y = board.y if board.y else ch
-
-        for i in range(n):
-            self.center_v_line(x - 6, y, 20)
-            # self.center_v_line(x - 12, y, 20)
-            self.center_v_line(x + 6, y, 20)
-            # self.center_v_line(x + 12, y, 20)
-
-            self.center_h_line(x, y - 3, 40)
-            # self.center_h_line(x, y-8, 40)
-            self.center_h_line(x, y + 3, 40)
-            # self.center_h_line(x, y+8, 40)
-            # self.center_v_line(cw - 2, x, 10)
-            # self.center_v_line(cw - 4, x, 10)
-            # self.center_v_line(cw + 2, x, 10)
-            # self.center_v_line(cw + 4, x, 10)
+    # def draw_cross(self, board):
+    #
+    #     cw = self.w / 2
+    #     ch = self.h / 2
+    #
+    #     n = board.n
+    #     x = board.x if board.x else cw
+    #     y = board.y if board.y else ch
+    #
+    #     for i in range(n):
+    #         self.center_v_line(x - 6, y, 20)
+    #         # self.center_v_line(x - 12, y, 20)
+    #         self.center_v_line(x + 6, y, 20)
+    #         # self.center_v_line(x + 12, y, 20)
+    #
+    #         self.center_h_line(x, y - 3, 40)
+    #         # self.center_h_line(x, y-8, 40)
+    #         self.center_h_line(x, y + 3, 40)
+    #         # self.center_h_line(x, y+8, 40)
+    #         # self.center_v_line(cw - 2, x, 10)
+    #         # self.center_v_line(cw - 4, x, 10)
+    #         # self.center_v_line(cw + 2, x, 10)
+    #         # self.center_v_line(cw + 4, x, 10)
 
 
 # class GameBoard(object):
@@ -382,10 +382,10 @@ if __name__ == "__main__":
         scr.nodelay(1)
         screen = Screen(scr)
         # board.line(0, 0, 5, 5)
-        # board.yScreen()
-        # board.numScreen()
-        # board.randomScreen()
-        # board.simpleDisplay()
+        # board.y_screen()
+        # board.num_screen()
+        # board.random_screen()
+        # board.simple_display()
         count = 0
 
         # gameBoard = GameBoard(3, 10, 20)
@@ -410,7 +410,7 @@ if __name__ == "__main__":
             # screen.center_h_line(screen.w / 2, screen.h / 2, 25)
 
             # gameBoard.x = gameBoard.x + 0.1
-            # screen.drawBoard(gameBoard)
+            # screen.draw_cross(gameBoard)
 
 
             #grid.scale(sin(sc))
@@ -431,7 +431,7 @@ if __name__ == "__main__":
             # temp.rotate(sc,18,25)
             # temp.draw()
 
-            screen.cursesDisplay()
+            screen.curses_display()
             time.sleep(0.001)
             count += 1
 
