@@ -9,7 +9,7 @@ from math import cos, sin, pi
 # maxYX=stdWindow.getmaxyx()
 
 
-class Screen:
+class Screen(object):
 
     def __init__(self, scr):
 
@@ -51,18 +51,26 @@ class Screen:
         self.screen = [[self.blank for y in range(self.h)] for x in range(self.w)]
 
     def clearScreen(self):
+
         self.scr.clear()
         self.screen = [[self.blank for y in range(self.h)] for x in range(self.w)]
 
     def point(self, x, y):
+
         x, y, = int(x), int(y)
         self.screen[x][y] = "x"
 
     def set(self, x, y, c):
-        if not x > self.w and not y > self.h and not x < 0 and not y < 0:
+
+        # x = int((x-self.w/2) * 1.5 +(self.w/2))
+
+        if not x > self.w-1 and not y > self.h-1 and not x < 0 and not y < 0:
             self.screen[x][y] = c
 
     def line(self, x1, y1, x2, y2):
+        s = 2
+        x1 = x1 *s - self.w/s
+        x2 = x2 *s - self.w/s
         x1, y1, x2, y2 = round(x1), round(y1), round(x2), round(y2)
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
@@ -84,7 +92,7 @@ class Screen:
                 error += dx
                 y1 += signY
 
-    def centerLine(self, x, y, a, l):
+    def center_line(self, x, y, a, l):
         x, y, a, l = float(x), float(y), float(a), float(l)
         l *= 0.5
         x1 = x + cos(a) * l
@@ -93,7 +101,13 @@ class Screen:
         y2 = y - sin(a + pi) * l
         self.line(x1, y1, x2, y2)
 
-    def angleLine(self, x, y, a, l):
+    def center_v_line(self, x, y, l):
+        self.center_line(x, y, pi / 2, l)
+
+    def center_h_line(self, x, y, l):
+        self.center_line(x, y, pi * 2, l)
+
+    def angle_line(self, x, y, a, l):
 
         x, y, a, l = float(x), float(y), float(a), float(l)
         self.line(x, y, x + cos(a) * l, y - sin(a) * l)
@@ -124,11 +138,6 @@ class Screen:
 
     def cursesDisplay(self):
         self.scr.clear()
-        # for x in range(self.w):
-        #     for y in range(self.h):
-        #         cell = self.screen[x][y]
-        #         if cell is not None:
-        #             self.scr.addch(y,x,cell)
 
         for y in range(self.h):
             for x in range(self.w):
@@ -142,6 +151,209 @@ class Screen:
             for x in range(self.w):
                 logNoString(self.screen[x][y])
             logNoString("\n")
+
+    def drawBoard(self, board):
+
+        cw = self.w / 2
+        ch = self.h / 2
+
+        n = board.n
+        x = board.x if board.x else cw
+        y = board.y if board.y else ch
+
+        for i in range(n):
+            self.center_v_line(x - 6, y, 20)
+            # self.center_v_line(x - 12, y, 20)
+            self.center_v_line(x + 6, y, 20)
+            # self.center_v_line(x + 12, y, 20)
+
+            self.center_h_line(x, y - 3, 40)
+            # self.center_h_line(x, y-8, 40)
+            self.center_h_line(x, y + 3, 40)
+            # self.center_h_line(x, y+8, 40)
+            # self.center_v_line(cw - 2, x, 10)
+            # self.center_v_line(cw - 4, x, 10)
+            # self.center_v_line(cw + 2, x, 10)
+            # self.center_v_line(cw + 4, x, 10)
+
+
+# class GameBoard(object):
+#
+#     def __init__(self, n, x=None, y=None):
+#         self.n = n
+#         self.x = x
+#         self.y = y
+#         self.playerSpace = [[None for y in range(self.n)] for x in range(self.n)]
+#
+#     def set_player_1(self, x, y):
+#         if self.playerSpace[x][y] is None:
+#             self.playerSpace[x][y] = 1
+#         else:
+#             print("space not empty")
+#
+#     def set_player_2(self, x, y):
+#         if self.playerSpace[x][y] is None:
+#             self.playerSpace[x][y] = 2
+#         else:
+#             print("space not empty")
+
+class Box(object):
+
+    def __init__(self, n, x, y, screen):
+        self.n = n
+        self.x = x
+        self.y = y
+        self.screen = screen
+        w = 4
+        h = 2
+
+        self.v1 = Line(x - w, y - h, x - w, y + h, self.screen)
+        self.v2 = Line(x + w, y - h, x + w, y + h, self.screen)
+        self.h1 = Line(x - w, y - h, x + w, y - h, self.screen)
+        self.h2 = Line(x - w, y + h, x + w, y + h, self.screen)
+
+    def draw(self):
+        self.v1.draw()
+        self.v2.draw()
+        self.h1.draw()
+        self.h2.draw()
+
+
+class Grid(object):
+
+    def __init__(self, n, x, y, screen):
+        self.n = n
+        self.x = x
+        self.y = y
+        self.screen = screen
+        s = 1
+        w = 6
+        h = 6
+        w *= s
+        h *= s
+
+        u = (2 + 1 / 3)
+
+        self.v1 = Line(x - w, y - h * u, x - w, y + h * u, self.screen)
+        self.v2 = Line(x + w, y - h * u, x + w, y + h * u, self.screen)
+        self.h1 = Line(x - w * u, y - h, x + w * u, y - h, self.screen)
+        self.h2 = Line(x - w * u, y + h, x + w * u, y + h, self.screen)
+
+
+    #
+    # def translate(self):
+
+
+    def draw(self):
+        self.v1.draw()
+        self.v2.draw()
+        self.h1.draw()
+        self.h2.draw()
+
+    def rotate(self, ergle):
+
+        x = self.x
+        y = self.y
+        self.v1.rotate(ergle, x, y)
+        self.v2.rotate(ergle, x, y)
+        self.h1.rotate(ergle, x, y)
+        self.h2.rotate(ergle, x, y)
+
+    def translate(self, x,y):
+        log("x", x)
+        self.v1.translate(x,y)
+        self.v2.translate(x,y)
+        self.h1.translate(x,y)
+        self.h2.translate(x,y)
+
+    def scale(self, sx, sy = None):
+        sy = sx if sy is None else sy
+        self.v1.scale(sx,sy, self.x, self.y)
+        self.v2.scale(sx,sy, self.x, self.y)
+        self.h1.scale(sx,sy, self.x, self.y)
+        self.h2.scale(sx,sy, self.x, self.y)
+
+
+class Line(object):
+
+    def __init__(self, x1, y1, x2, y2, screen):
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
+        self.screen = screen
+    #     self.get_pivot()
+    #
+    # def get_pivot(self):
+    #     self.pivotX = (self.x1 + self.x2) / 2
+    #     self.pivotY = (self.y1 + self.y2) / 2
+
+    def translate(self, x, y):
+        self.x1 += x
+        self.y1 += y
+        self.x2 += x
+        self.y2 += y
+
+    def scale(self, sx, sy, px ,py):
+
+        self.x1 = (self.x1 - px) * sx + px
+        self.y1 = (self.y1 - py) * sy + py
+        self.x2 = (self.x2 - px) * sx + px
+        self.y2 = (self.y2 - py) * sy + py
+
+    def rotate(self, angle, cx, cy):
+
+
+        # log("x1", self.x1)
+        self.x1, self.y1 = rotatePoint(angle, self.x1, self.y1, cx, cy)
+        self.x2, self.y2 = rotatePoint(angle, self.x2, self.y2, cx, cy)
+        # log("x1", self.x1)
+        # logNoString("\n")
+
+        '''angle = (angle ) * (Math.PI/180); // Convert to radians
+
+        var rotatedX = Math.cos(angle) * (point.x - center.x) - Math.sin(angle) * (point.y-center.y) + center.x;
+
+        var rotatedY = Math.sin(angle) * (point.x - center.x) + Math.cos(angle) * (point.y - center.y) + center.y;
+
+
+
+        return new createjs.Point(rotatedX,rotatedY);'''
+
+    def draw(self):
+        self.screen.line(self.x1, self.y1, self.x2, self.y2)
+
+
+
+class CenterLine(object):
+
+    def __init__(self, x, y, a, l):
+        self.x = x
+        self.y = y
+        self.a = a
+        self.l = l
+    def translate(self, x, y):
+        self.x += x
+        self.y += y
+    def scale(self, s):
+        self.l += s
+
+    def rotate(self, r):
+        self.a += r
+
+    def draw(self):
+        self.screen.center_line(self.x, self.y, self.a, self.l)
+
+
+
+def rotatePoint(a, px, py, cx, cy):  # angle, point to rotate x and y, pivot x and y
+
+
+    #log("ra", a)
+    rx = cos(a) * (px - cx) - sin(a) * (py - cy) + cx
+    ry = sin(a) * (px - cx) + cos(a) * (py - cy) + cy
+    return (rx, ry)
+
 
 
 def log(string, value=None):
@@ -168,7 +380,7 @@ if __name__ == "__main__":
 
     def main(scr):
         scr.nodelay(1)
-        board = Screen(scr)
+        screen = Screen(scr)
         # board.line(0, 0, 5, 5)
         # board.yScreen()
         # board.numScreen()
@@ -176,22 +388,51 @@ if __name__ == "__main__":
         # board.simpleDisplay()
         count = 0
 
+        # gameBoard = GameBoard(3, 10, 20)
+
+        temp = Line(5, 18, 35, 20, screen)
+
+        d1 = 500
+        d2 = 1000
+        #grid = Grid(3, screen.w / 2, screen.h / 2, screen)
         while True:
-            sc = count * 0.05 / 2
+            grid = Grid(3, screen.w / 2, screen.h / 2, screen)
+            logNoString("\ncycle\n\n")
+            sc = count * 0.03 / 2
+            mc = count * 0.03
             c = scr.getch()
             curses.flushinp()
             # scr.clear()
-            board.clearScreen()
+            screen.clearScreen()
 
-            # board.line(randint(0,board.w-1),randint(0,board.h-1),randint(0,board.w-1),randint(0,board.h-1))
-            board.line(0, 1, 10, 10)
-            board.set(-5, 5, "x")
-            #board.angleLine(board.w / 2, board.h / 2, sc, 10)
-            # board.point((sin(sc)*20+board.w/2), (cos(sc)*10+board.h/2)*1)
-            board.centerLine(board.w/2,board.h/2, sc, 25)
+            # screen.center_line(screen.w / 2, screen.h / 2, sc, 25)
+            # screen.center_v_line(screen.w / 2, screen.h / 2, 25)
+            # screen.center_h_line(screen.w / 2, screen.h / 2, 25)
 
-            board.cursesDisplay()
+            # gameBoard.x = gameBoard.x + 0.1
+            # screen.drawBoard(gameBoard)
+
+
+            #grid.scale(sin(sc))
+            if count == d2:
+                v = mc
+            if count > d2:
+                grid.scale(sin((sc-v))+1.3,sin((sc-v))+1.3)
+            grid.rotate(sc*0.8)
+            if count == d1:
+                u = mc
+            if count > d1:
+               grid.translate(sin(mc-u)*20, 0)
+
+
+
+            grid.draw()
+
+            # temp.rotate(sc,18,25)
+            # temp.draw()
+
+            screen.cursesDisplay()
             time.sleep(0.001)
             count += 1
 
-wrapper(main)
+    wrapper(main)
