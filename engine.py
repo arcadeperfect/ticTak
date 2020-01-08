@@ -1,10 +1,11 @@
 import curses
 from curses import wrapper
-from utilz import *
+# from utilz import *
 from random import randint
 import time
 from math import cos, sin, pi
-
+import scipy
+from threedee import *
 
 # maxYX=stdWindow.getmaxyx()
 
@@ -60,10 +61,10 @@ class Screen(object):
         x, y, = int(x), int(y)
         self.screen[x][y] = "x"
 
-    def set(self, x, y, c):
+    def set(self, x, y, c = "*"):
 
         # x = int((x-self.w/2) * 1.5 +(self.w/2))
-
+        x, y  = int(x), int(y)
         if not x > self.w-1 and not y > self.h-1 and not x < 0 and not y < 0:
             self.screen[x][y] = c
 
@@ -379,8 +380,8 @@ if __name__ == "__main__":
 
 
     def main(scr):
-        scr.nodelay(1)
-        screen = Screen(scr)
+        scr.nodelay(1)                  # disable blocking
+        screen = Screen(scr)            # renderer with curses default screen
         # board.line(0, 0, 5, 5)
         # board.y_screen()
         # board.num_screen()
@@ -395,44 +396,113 @@ if __name__ == "__main__":
         d1 = 500
         d2 = 1000
         #grid = Grid(3, screen.w / 2, screen.h / 2, screen)
+
+
+        #################################################################
+
+        # points = [
+        #     [-6, -6, -6],
+        #     [-6,-0,-6],
+        #     [6, -6, -6],
+        #     [6, 6, -6],
+        #     [6, 6, 6],
+        #     [-6, 6, 6],
+        #     [-6, -6, 6],
+        #     [-6, 6, -6],
+        #     [6, -6, 6],
+        # ]
+        points = [
+            [-6, 6, 6],
+            [6, 6, 6],
+            [6, 6, 0],
+            [6, 0, 6],
+            [-6, 6, 6],
+            [-6, 6, 0],
+            [-6, 6, -6],
+            [-6, 0, -6],
+            [-6, -6, 0],
+            [-6, -6, -6],
+            [0, -6, 0],
+            [6, -6, -6],
+            [6, -6, 0],
+            [6, -6, 6],
+            [-6, 6, -6],
+            [0, 6, 0],
+            [-6, 0, 6],
+            [0, 6, -6],
+            [6,0,6],
+            [0,0,-6],
+            [6, 0, -6],
+            [0, 6, 6],
+            [6,6,-6],
+            [0,-6,-6],
+            [-6,-6,6],
+            [0,-6,6],
+            [0,0,6],
+            [6,0,0],
+            [-6,0,0]
+        ]
+
+            
+
+        a = 0
+
         while True:
-            grid = Grid(3, screen.w / 2, screen.h / 2, screen)
-            logNoString("\ncycle\n\n")
-            sc = count * 0.03 / 2
-            mc = count * 0.03
             c = scr.getch()
-            curses.flushinp()
-            # scr.clear()
+            screen.set(4, 3)
+            # for x, i in enumerate(points):
             screen.clearScreen()
 
-            # screen.center_line(screen.w / 2, screen.h / 2, sc, 25)
-            # screen.center_v_line(screen.w / 2, screen.h / 2, 25)
-            # screen.center_h_line(screen.w / 2, screen.h / 2, 25)
 
-            # gameBoard.x = gameBoard.x + 0.1
-            # screen.draw_cross(gameBoard)
+            for i in points:
+                prj = project(rotateY(i, a),0,0)
+                #screen.set(i[0]+screen.w/2, i[1]+screen.h/2)
 
-
-            #grid.scale(sin(sc))
-            if count == d2:
-                v = mc
-            if count > d2:
-                grid.scale(sin((sc-v))+1.3,sin((sc-v))+1.3)
-            grid.rotate(sc*0.8)
-            if count == d1:
-                u = mc
-            if count > d1:
-               grid.translate(sin(mc-u)*20, 0)
-
-
-
-            grid.draw()
-
-            # temp.rotate(sc,18,25)
-            # temp.draw()
+                screen.set(((prj[0]*2.2)+screen.w/2), (prj[1]+screen.h/2))
 
             screen.curses_display()
-            time.sleep(0.001)
-            count += 1
+            a += 0.03/2
+
+        #################################################################
+
+        # while True:
+        #     grid = Grid(3, screen.w / 2, screen.h / 2, screen)
+        #     logNoString("\ncycle\n\n")
+        #     sc = count * 0.03 / 2
+        #     mc = count * 0.03
+        #     c = scr.getch()
+        #     curses.flushinp()
+        #     # scr.clear()
+        #     screen.clearScreen()
+        #
+        #     # screen.center_line(screen.w / 2, screen.h / 2, sc, 25)
+        #     # screen.center_v_line(screen.w / 2, screen.h / 2, 25)
+        #     # screen.center_h_line(screen.w / 2, screen.h / 2, 25)
+        #
+        #     # gameBoard.x = gameBoard.x + 0.1
+        #     # screen.draw_cross(gameBoard)
+        #
+        #
+        #     #grid.scale(sin(sc))
+        #     if count == d2:
+        #         v = mc
+        #     if count > d2:
+        #         grid.scale(sin((sc-v))+1.3,sin((sc-v))+1.3)
+        #     grid.rotate(sc*0.8)
+        #     if count == d1:
+        #         u = mc
+        #     if count > d1:
+        #        grid.translate(sin(mc-u)*20, 0)
+        #
+        #
+        #
+        #     grid.draw()
+        #
+        #     # temp.rotate(sc,18,25)
+        #     # temp.draw()
+        #
+        #     screen.curses_display()
+        #     time.sleep(0.001)
+        #     count += 1
 
     wrapper(main)
