@@ -11,19 +11,24 @@ class Game(object):
 
     def game_loop(self):
 
-
-
-        if self.playerState == None:
+        if self.playerState is None:
             # first loop
             self.playerState = 1
+
+        #todo refactor board set_player method so I don't need to duplicate this code
+        #todo win detection failing when going top to bottom super weird
+        # but doesn't fail when only 1 player
+        self.board.check_for_win()
 
         if self.playerState == 1:
             print("player 1")
             move_complete = False
-            while move_complete == False:
 
-                string = input()
-                x, y = int(string[0]), int(string[1])
+            while move_complete is False:
+
+
+                x, y = self.get_input()
+
                 if self.board.set_player_1(x, y):
                     self.board.print_matrix()
                     self.board.check_for_win()
@@ -37,8 +42,7 @@ class Game(object):
             move_complete = False
             while move_complete == False:
 
-                string = input()
-                x, y = int(string[0]), int(string[1])
+                x, y = self.get_input()
                 if self.board.set_player_2(x, y):
                     self.board.print_matrix()
                     self.board.check_for_win()
@@ -47,6 +51,26 @@ class Game(object):
                 else:
                     print("space not empty")
 
+
+    def get_input(self):
+        string = ""
+        while True:
+            string = input()
+            if len(string) != 2:
+                print("enter 2 digits")
+                continue
+            else:
+                try:
+                    x, y = int(string[0])-1, int(string[1])-1
+                except:
+                    print("invalid input")
+                    continue
+
+                if 0 <= x < self.board.w and 0 <= y < self.board.h:
+                    return x,y
+
+                else:
+                    print("out of bounds")
 
 
 
@@ -61,7 +85,6 @@ class Board(object):
 
         self.winner = False
 
-    # todo: breaks when you try to play out of bounds
 
     def set_player_1(self, x, y):
         cell = self.check_cell(x, y)
@@ -116,17 +139,13 @@ class Board(object):
 
     def check_for_win(self, x=None, y=None, vx=None, vy=None, player=None, depth = 0):
         # recursively check for the winner
-        # todo: currently only works for 3 x 3 because it only checks if you have hit the edge
-        #  doesn't count number of wins
 
-        # if no vector supplied, therefore first recursive level
+        # if first level
+        if depth == 0:
 
-        if vx is None or vy is None and won is False:
-
-            # initial loop only start along the edges, bc false positive if we start from the center
+            # initial loop only start along the edges
             depth = 1
-            to_check = [[x, 0] for x in range(self.w)]
-            to_check += [[0, y] for y in range(self.h)]
+            to_check = [[x, 0] for x in range(self.w)] + [[0, y] for y in range(self.h)]
 
             for x, y in to_check:
 
@@ -145,11 +164,9 @@ class Board(object):
                                 if cell_2 == cell_1:
                                     vx = x2 - x
                                     vy = y2 - y
-                                    print("checking", x2,y2)
-                                    return self.check_for_win(x2, y2, vx, vy, cell_1, 1)
+                                    return self.check_for_win(x2, y2, vx, vy, cell_1, depth)
 
         # if params are specified, keep checking in that direction based on the vector
-
         else:
             depth += 1
             # print("depth", depth)
@@ -170,24 +187,6 @@ class Board(object):
                         #print("checking", x2, y2)
                         return self.check_for_win(x2, y2, vx, vy, player, depth)
 
-
-
-        # else:
-        #     depth += 1
-        #     print("depth", depth)
-        #
-        #     cell_1 = self.check_cell(x, y)
-        #     if cell_1 == player:
-        #         x2 = x + vx
-        #         y2 = y + vy
-        #         if self.within_board(x2, y2):
-        #             print(x2,y2, "is within board")
-        #             return self.check_for_win(x2, y2, vx, vy, player, depth)
-        #         else:
-        #             if depth == self.w:
-        #                 print("winner is", player)
-        #                 self.winner = player
-        #                 return player
 
     def print_matrix(self):
         for y in reversed(range(self.h)):
