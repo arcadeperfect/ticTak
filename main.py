@@ -1,3 +1,5 @@
+import sys
+
 class Game(object):
 
     def __init__(self):
@@ -9,47 +11,43 @@ class Game(object):
 
     def game_loop(self):
 
+
+
         if self.playerState == None:
             # first loop
             self.playerState = 1
 
-        if self.board.winner is not False:
-            print("winner is ", self.board.winner)
-            self.winner = self.board.winner
-            return
-
-        if self.playerState == 1 and self.winner == None:
+        if self.playerState == 1:
             print("player 1")
+            move_complete = False
+            while move_complete == False:
 
-            # get player 1 input
-
-            turn_taken = False
-            while turn_taken == False:
                 string = input()
                 x, y = int(string[0]), int(string[1])
                 if self.board.set_player_1(x, y):
                     self.board.print_matrix()
-                    turn_taken = True
+                    self.board.check_for_win()
                     self.playerState = 2
+                    move_complete = True
                 else:
                     print("space not empty")
-            self.winner = self.board.check_for_win()
 
-        if self.playerState == 2  and self.winner == None:
+        if self.playerState == 2:
             print("player 2")
+            move_complete = False
+            while move_complete == False:
 
-            # get player 2 input
-            turn_taken = False
-            while turn_taken == False:
                 string = input()
                 x, y = int(string[0]), int(string[1])
                 if self.board.set_player_2(x, y):
                     self.board.print_matrix()
-                    turn_taken = True
+                    self.board.check_for_win()
                     self.playerState = 1
+                    move_complete = True
                 else:
                     print("space not empty")
-            self.winner = self.board.check_for_win()
+
+
 
 
 class Board(object):
@@ -133,41 +131,44 @@ class Board(object):
             for x, y in to_check:
 
                 # check for a play in this spot
+                if self.within_board(x,y ):
+                    cell_1 = self.check_cell(x, y)
+                    if cell_1:
 
-                cell_1 = self.check_cell(x, y)
-                if cell_1:
+                        # if cell isn't empty, get all the neighbors. Returns list of (x,y) tuples
 
-                    # if cell isn't empty, get all the neighbors. Returns list of (x,y) tuples
-
-                    for i in self.get_neighbors(x, y):
-                        x2 = i[0]
-                        y2 = i[1]
-                        cell_2 = self.check_cell(x2, y2)
-                        if cell_2 == cell_1:
-                            vx = x2 - x
-                            vy = y2 - y
-                            print("checking", x2,y2)
-                            return self.check_for_win(x2, y2, vx, vy, cell_1, 1)
+                        for i in self.get_neighbors(x, y):
+                            x2 = i[0]
+                            y2 = i[1]
+                            if self.within_board(x2, y2):
+                                cell_2 = self.check_cell(x2, y2)
+                                if cell_2 == cell_1:
+                                    vx = x2 - x
+                                    vy = y2 - y
+                                    print("checking", x2,y2)
+                                    return self.check_for_win(x2, y2, vx, vy, cell_1, 1)
 
         # if params are specified, keep checking in that direction based on the vector
 
         else:
             depth += 1
             # print("depth", depth)
+            if self.within_board(x, y):
+                cell_1 = self.check_cell(x, y)
+                if cell_1 == player:
+                    x2 = x + vx
+                    y2 = y + vy
 
-            cell_1 = self.check_cell(x, y)
-            if cell_1 == player:
-                x2 = x + vx
-                y2 = y + vy
+                    if depth == self.w:
+                        print("winner is", player)
+                        self.winner = player
+                        sys.exit()
+                        return player
 
-                if depth == self.w:
-                    print("winner is", player)
-                    self.winner = player
-                    return player
 
-                else:
-                    print("checking", x2, y2)
-                    return self.check_for_win(x2, y2, vx, vy, player, depth)
+                    else:
+                        #print("checking", x2, y2)
+                        return self.check_for_win(x2, y2, vx, vy, player, depth)
 
 
 
@@ -202,5 +203,5 @@ class Board(object):
 if __name__ == "__main__":
     game = Game()
 
-    while game.winner is None:
+    while True:
         game.game_loop()
